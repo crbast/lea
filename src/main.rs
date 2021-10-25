@@ -9,11 +9,25 @@ use std::net::TcpStream;
 fn handle_client(mut stream: TcpStream) {
     let mut data = [0 as u8; 50]; // using 50 byte buffer
 
+    let answer = "HTTP/1.1 200 OK
+Date: Sun, 10 Oct 2010 23:26:07 GMT
+Server: Lea/0.1.0 2021
+Last-Modified: Sun, 26 Sep 2010 22:04:35 GMT
+Accept-Ranges: bytes
+Content-Length: 13
+Connection: close
+Content-Type: text/html
+        
+
+Hello world!
+";
+
     while match stream.read(&mut data){
-        Ok(size) => {
+        Ok(_) => {
             // echo everything!
             println!("{}", std::str::from_utf8(&data).unwrap());
-            stream.write(&data[0..size]).unwrap();
+            stream.write(answer.as_bytes()).unwrap();
+            stream.shutdown(Shutdown::Write).unwrap();
             true
         },
         Err(_) => {
