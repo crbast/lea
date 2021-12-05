@@ -1,13 +1,11 @@
-
-
-use std::net::Shutdown;
 use std::io::Read;
 use std::io::Write;
+use std::net::Shutdown;
 use std::net::TcpListener;
 use std::net::TcpStream;
 
 fn handle_client(mut stream: TcpStream) {
-    let mut data = [0 as u8; 50]; // using 50 byte buffer
+    let mut data = [0 as u8; 200];
 
     let answer = "HTTP/1.1 200 OK
 Date: Sun, 10 Oct 2010 23:26:07 GMT
@@ -22,16 +20,18 @@ Content-Type: text/html
 Hello world!
 ";
 
-    while match stream.read(&mut data){
+    while match stream.read(&mut data) {
         Ok(_) => {
-            // echo everything!
             println!("{}", std::str::from_utf8(&data).unwrap());
             stream.write(answer.as_bytes()).unwrap();
             stream.shutdown(Shutdown::Write).unwrap();
-            true
-        },
+            false
+        }
         Err(_) => {
-            println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap());
+            println!(
+                "An error occurred, terminating connection with {}",
+                stream.peer_addr().unwrap()
+            );
             stream.shutdown(Shutdown::Both).unwrap();
             false
         }
@@ -45,7 +45,7 @@ fn main() -> std::io::Result<()> {
         match stream {
             Ok(stream) => {
                 handle_client(stream);
-            },
+            }
             Err(e) => {
                 println!("Error: {}", e);
                 /* connection failed */
